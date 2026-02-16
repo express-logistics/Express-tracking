@@ -2,49 +2,46 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Express Logistics Tracking</title>
+<title>Express Logistics</title>
 
 <style>
 body {
 font-family: Arial, sans-serif;
-background: #f4f4f4;
+background: #111;
+color: white;
 text-align: center;
-padding: 60px;
+padding: 40px;
 }
 
 .container {
-background: white;
+background: #1c1c1c;
 padding: 40px;
 border-radius: 12px;
-box-shadow: 0px 0px 20px rgba(0,0,0,0.1);
-max-width: 800px;
+max-width: 900px;
 margin: auto;
+box-shadow: 0px 0px 30px rgba(0,0,0,0.5);
 }
 
 h1 {
-margin-bottom: 5px;
+color: #ffcc00;
 }
 
-h3 {
-color: #666;
-margin-bottom: 30px;
-}
-
-input {
-padding: 12px;
+input, select {
+padding: 10px;
 width: 70%;
+margin-top: 10px;
 border-radius: 6px;
-border: 1px solid #ccc;
+border: none;
 }
 
 button {
-margin-top: 15px;
 padding: 12px 25px;
 background-color: #ffcc00;
 border: none;
 border-radius: 6px;
 cursor: pointer;
 font-weight: bold;
+margin-top: 15px;
 }
 
 button:hover {
@@ -55,7 +52,6 @@ background-color: #e6b800;
 margin-top: 25px;
 text-align: left;
 line-height: 1.7;
-font-weight: bold;
 }
 
 .progress {
@@ -65,12 +61,20 @@ margin-top: 25px;
 .step {
 padding: 10px;
 margin: 6px 0;
-background: #eee;
+background: #333;
 border-radius: 5px;
 }
 
 .active {
 background: #ffcc00;
+color: black;
+}
+
+.admin-panel {
+margin-top: 50px;
+padding: 20px;
+background: #222;
+border-radius: 10px;
 }
 
 iframe {
@@ -85,7 +89,7 @@ border: none;
 
 <div class="container">
 <h1>Express Logistics</h1>
-<h3>International Shipment Tracking</h3>
+<h3>Premium International Shipment Tracking</h3>
 
 <input type="text" id="trackingInput" placeholder="Enter Tracking Number">
 <br>
@@ -96,31 +100,47 @@ border: none;
 
 <iframe id="mapFrame" width="100%" height="300"></iframe>
 
+<div class="admin-panel">
+<h2>Admin Panel</h2>
+
+<input type="password" id="adminPass" placeholder="Enter Admin Password">
+<br>
+<button onclick="unlockAdmin()">Unlock</button>
+
+<div id="adminControls" style="display:none; margin-top:20px;">
+
+<input type="text" id="origin" placeholder="Origin (e.g. New York, USA)">
+<input type="text" id="destination" placeholder="Destination (e.g. Canada)">
+<input type="text" id="location" placeholder="Current Location">
+<select id="status">
+<option>Order Confirmed</option>
+<option>Dispatched</option>
+<option>In Transit</option>
+<option>Arrived at Border</option>
+<option>Out for Delivery</option>
+<option>Delivered</option>
+</select>
+<input type="text" id="eta" placeholder="Estimated Delivery">
+
+<br>
+<button onclick="generateTracking()">Generate Tracking Number</button>
+
+<p id="generatedNumber"></p>
+
+</div>
+</div>
+
 </div>
 
 <script>
 
-const shipments = {
+let shipments = {
 "EXP-2026-001": {
 status: "In Transit",
 origin: "New York, USA",
 destination: "Canada",
 location: "Buffalo, NY",
 eta: "24 - 48 Hours"
-},
-"EXP-2026-002": {
-status: "Arrived at Border",
-origin: "New York, USA",
-destination: "Canada",
-location: "Niagara Border Crossing",
-eta: "12 - 24 Hours"
-},
-"EXP-2026-003": {
-status: "Out for Delivery",
-origin: "New York, USA",
-destination: "Toronto, Canada",
-location: "Toronto Distribution Center",
-eta: "Today"
 }
 };
 
@@ -141,12 +161,12 @@ return;
 const shipment = shipments[trackingNumber];
 
 result.innerHTML =
-"Tracking Number: " + trackingNumber + "<br>" +
-"Status: " + shipment.status + "<br>" +
-"Origin: " + shipment.origin + "<br>" +
-"Destination: " + shipment.destination + "<br>" +
-"Current Location: " + shipment.location + "<br>" +
-"Estimated Delivery: " + shipment.eta;
+"<strong>Tracking:</strong> " + trackingNumber + "<br>" +
+"<strong>Status:</strong> " + shipment.status + "<br>" +
+"<strong>Origin:</strong> " + shipment.origin + "<br>" +
+"<strong>Destination:</strong> " + shipment.destination + "<br>" +
+"<strong>Current Location:</strong> " + shipment.location + "<br>" +
+"<strong>ETA:</strong> " + shipment.eta;
 
 generateProgress(shipment.status);
 
@@ -173,12 +193,37 @@ const div = document.createElement("div");
 div.className = "step";
 div.innerText = step;
 
-if (status.toLowerCase().includes(step.toLowerCase())) {
+if (status === step) {
 div.classList.add("active");
 }
 
 progress.appendChild(div);
 });
+}
+
+function unlockAdmin() {
+const pass = document.getElementById("adminPass").value;
+if (pass === "admin123") {
+document.getElementById("adminControls").style.display = "block";
+} else {
+alert("Incorrect Password");
+}
+}
+
+function generateTracking() {
+
+const newNumber = "EXP-" + new Date().getFullYear() + "-" + Math.floor(100 + Math.random() * 900);
+
+shipments[newNumber] = {
+origin: document.getElementById("origin").value,
+destination: document.getElementById("destination").value,
+location: document.getElementById("location").value,
+status: document.getElementById("status").value,
+eta: document.getElementById("eta").value
+};
+
+document.getElementById("generatedNumber").innerHTML =
+"New Tracking Number: <strong>" + newNumber + "</strong>";
 
 }
 
